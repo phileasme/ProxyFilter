@@ -9,6 +9,7 @@ We test each address for:
 - If it is private
 - If it is behind Cloudflare
 - It's reachability: ICMP, TCP
+- Optionaly, if we can tunnel an http request through it
 
 ## Features
 
