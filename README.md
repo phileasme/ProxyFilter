@@ -21,10 +21,10 @@ These issues often result in automated systems or network administrators reporti
 ## Features
 
 **We check if the address is:**
->-   If it is private
->-  If it is behind Cloudflare
->-  It's reachability: ICMP, TCP
->-  Optionally, you have the ability to test proxies.
+>-    private
+>-    behind Cloudflare
+>-    reachability: ICMP, TCP.
+>-    tunnelable (optionally)
 
 **Tasks involved:**
 >- Process and categorize proxy servers
@@ -43,27 +43,33 @@ from proxy.proxyfilter import ProxyFilter
 
 async def main():
     proxy_filter = ProxyFilter()
-    
-    # Process historical proxies and test them
-    await proxy_filter.process_proxies(historical=True, test_proxies=True)
-    
     # Add and process new potential proxies
     # Acceptable formats are as so, where everything passed the port is optional:
     # "8.8.8.8:80|1~provider1,provider2+5"  <--> "<ip>:<port>|<validity>~<*providers>+<calls>" <--> 
     new_proxies = ["1.1.1.1:80", "2.2.2.2:8080"]
     await proxy_filter.process_proxies(proxies=new_proxies, historical=True, test_proxies=True)
+
+    proxy_filter = ProxyFilter()
+    # Load historical proxies and test them
+    await proxy_filter.process_proxies(historical=True, test_proxies=True)
+    
+    proxy_filter = ProxyFilter()
+    # Load historical proxies and test them
+    await proxy_filter.process_proxies(reprocess_historical=True)
+
     # feature_flags:
     #   historical: if files in proxies are existant, we will use their information to avoid reprocessing already 
     #   test_proxies: tunnels through the proxies and makes a simple http request, if functional the proxy is validated.
 
     # While files will be generated in proxy/proxies, the relevant information will be also accessible after processing in:
-    # Port{ port number,  validity status, providers, number of calls }
+
+    #                                                 Port{port number, validity status, providers, number of calls}
     proxy_filter.ips #: Dict[str, Dict](lambda: {"ports": OrderedDict(Port), "routable": False, "cloudflare": False})
-    proxy_filter.routable_addresses
-    proxy_filter.unroutable_addresses
-    proxy_filter.cloudflare_addresses
-    proxy_filter.untested_proxies
-    proxy_filter.working_proxies
+    proxy_filter.routable_addresses # 212.252.72.106
+    proxy_filter.unroutable_addresses # 3.87.195.240
+    proxy_filter.cloudflare_addresses # 1.1.1.1
+    proxy_filter.untested_proxies # 67.43.236.20:28545
+    proxy_filter.working_proxies # 212.252.72.106:3128|1~bigprovider,smallguy,unreliablelist+3
     
     
     # The results will be saved in the respective files in the 'proxy/proxies/' directory
