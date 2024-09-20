@@ -41,6 +41,15 @@ async def main():
     # feature_flags:
     #   historical: if files in proxies are existant, we will use their information to avoid reprocessing already 
     #   test_proxies: tunnels through the proxies and makes a simple http request, if functional the proxy is validated.
+
+    # While files will be generated in proxy/proxies, the relevant information will be also accessible after processing in:
+    proxy_filter.ips #: Dict[str, Dict](lambda: {"ports": OrderedDict(), "routable": False, "cloudflare": False})
+    proxy_filter.routable_addresses
+    proxy_filter.unroutable_addresses
+    proxy_filter.cloudflare_addresses
+    proxy_filter.untested_proxies
+    proxy_filter.working_proxies
+    
     
     # The results will be saved in the respective files in the 'proxy/proxies/' directory
 
@@ -60,9 +69,8 @@ if __name__ == "__main__":
 - `requirements.txt`: List of Python dependencies
 
 ## Configuration
-
+This is optional, they will be generated provided candidate proxy addresses.
 The system uses several configuration files located in the `proxy/proxies/` directory:
-
 - `_working_proxies.txt`: List of working proxies
 - `_broken_proxies.txt`: List of non-working proxies
 - `_untested_proxies.txt`: List of proxies that haven't been tested yet
