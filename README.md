@@ -23,7 +23,7 @@ These issues often result in automated systems or network administrators reporti
 **We check if the address is:**
 >-    private
 >-    behind Cloudflare
->-    reachability: ICMP, TCP.
+>-    reachable: ICMP, TCP.
 >-    tunnelable (optionally)
 
 **Tasks involved:**
