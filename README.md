@@ -57,7 +57,8 @@ async def main():
     #   test_proxies: tunnels through the proxies and makes a simple http request, if functional the proxy is validated.
 
     # While files will be generated in proxy/proxies, the relevant information will be also accessible after processing in:
-    proxy_filter.ips #: Dict[str, Dict](lambda: {"ports": OrderedDict(), "routable": False, "cloudflare": False})
+    # Port{ port number,  validity status, providers, number of calls }
+    proxy_filter.ips #: Dict[str, Dict](lambda: {"ports": OrderedDict(Port), "routable": False, "cloudflare": False})
     proxy_filter.routable_addresses
     proxy_filter.unroutable_addresses
     proxy_filter.cloudflare_addresses
