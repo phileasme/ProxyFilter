@@ -1,8 +1,8 @@
-# Proxy Filtering System
+# Proxy Validation System
 
 ## Overview
 
-This project is a robust proxy filtering/validating system designed to manage, test, and categorize proxy servers. It provides functionality to process both new and historical proxy data, test proxy connectivity, and maintain organized lists of proxies based on their status and performance. Often times proxies given by different providers are not even routable ip addresses.
+This project is a robust proxy filtering/validation system designed to manage, test, and categorize proxy servers. It provides functionality to process both new and historical proxy data, test proxy connectivity, and maintain organized lists of proxies based on their status and performance. Often times proxies given by different providers are not even routable ip addresses.
 
 We test each address for:
 - It's format
