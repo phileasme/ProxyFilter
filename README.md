@@ -1,20 +1,30 @@
-Proxy Filtering System
-Overview
-This project is a robust proxy filtering system designed to manage, test, and categorize proxy servers. It provides functionality to process both new and historical proxy data, test proxy connectivity, and maintain organized lists of proxies based on their status and performance. Often times proxies given by different providers are not even routable ip addresses.
-We test each addresses is tested for it's format, if it is private, behind cloudflare, and its reachability: ICMP, TCP.
-Features
+# Proxy Filtering System
 
-Process and categorize proxy servers
-Test proxy connectivity asynchronously
-Handle historical proxy data
-Maintain lists of routable, unroutable, and Cloudflare addresses
-File-based storage for proxy lists
-Concurrent proxy testing with progress tracking
+## Overview
 
+This project is a robust proxy filtering/validating system designed to manage, test, and categorize proxy servers. It provides functionality to process both new and historical proxy data, test proxy connectivity, and maintain organized lists of proxies based on their status and performance. Often times proxies given by different providers are not even routable ip addresses.
 
-Usage
-To use the proxy filtering system, you can import the ProxyFilter class from the main module and use its methods. Here's a basic example:
-pythonCopyfrom proxy.proxyfilter import ProxyFilter
+We test each address for:
+- It's format
+- If it is private
+- If it is behind Cloudflare
+- It's reachability: ICMP, TCP
+
+## Features
+
+- Process and categorize proxy servers
+- Test proxy connectivity asynchronously
+- Handle historical proxy data
+- Maintain lists of routable, unroutable, and Cloudflare addresses
+- File-based storage for proxy lists
+- Concurrent proxy testing with progress tracking
+
+## Usage
+
+To use the proxy filtering system, you can import the `ProxyFilter` class from the main module and use its methods. Here's a basic example:
+
+```python
+from proxy.proxyfilter import ProxyFilter
 
 async def main():
     proxy_filter = ProxyFilter()
@@ -36,34 +46,35 @@ async def main():
 if __name__ == "__main__":
     import asyncio
     asyncio.run(main())
-Project Structure
+```
 
-proxy/
+## Project Structure
 
-proxyfilter.py: Main ProxyFilter class implementation
-routability.py: Handles IP routability checks
-proxy_file_manager.py: Manages file operations for proxy lists
+- `proxy/`
+  - `proxyfilter.py`: Main ProxyFilter class implementation
+  - `routability.py`: Handles IP routability checks
+  - `proxy_file_manager.py`: Manages file operations for proxy lists
+- `tests/`: Contains unit tests for the project
+- `main.py`: Example script to run the proxy filtering system
+- `requirements.txt`: List of Python dependencies
 
+## Configuration
 
-tests/: Contains unit tests for the project
-main.py: Example script to run the proxy filtering system
-requirements.txt: List of Python dependencies
+The system uses several configuration files located in the `proxy/proxies/` directory:
 
-Configuration
-The system uses several configuration files located in the proxy/proxies/ directory:
+- `_working_proxies.txt`: List of working proxies
+- `_broken_proxies.txt`: List of non-working proxies
+- `_untested_proxies.txt`: List of proxies that haven't been tested yet
+- `_routable_addresses.txt`: List of routable IP addresses
+- `_unroutable_addresses.txt`: List of unroutable IP addresses
+- `_cloudflare_addresses.txt`: List of Cloudflare IP addresses
 
-_working_proxies.txt: List of working proxies
-_broken_proxies.txt: List of non-working proxies
-_untested_proxies.txt: List of proxies that haven't been tested yet
-_routable_addresses.txt: List of routable IP addresses
-_unroutable_addresses.txt: List of unroutable IP addresses
-_cloudflare_addresses.txt: List of Cloudflare IP addresses
+## Contributing
 
-Contributing
 Contributions to this project are welcome. Please follow these steps to contribute:
 
-Fork the repository
-Create a new branch for your feature
-Commit your changes
-Push to your branch
-Create a new Pull Request
+1. Fork the repository
+2. Create a new branch for your feature
+3. Commit your changes
+4. Push to your branch
+5. Create a new Pull Request
