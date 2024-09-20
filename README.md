@@ -2,23 +2,37 @@
 
 ## Overview
 
-This project is a robust proxy filtering/validation system designed to manage, test, and categorize proxy servers. It provides functionality to process both new and historical proxy data, test proxy connectivity, and maintain organized lists of proxies based on their status and performance. Often times proxies given by different providers are not even routable ip addresses.
+This project is a simple but robust proxy filtering system designed to manage, test, and categorize proxy servers. It provides functionality to process both new and historical proxy data, test proxy connectivity, and maintain organized lists of proxies based on their status and performance. 
 
-We test each address for:
-- It's format
-- If it is private
-- If it is behind Cloudflare
-- It's reachability: ICMP, TCP
-- Optionaly, if we can tunnel an http request through it
+### Motive
+Proxy reliability is a critical issue in network operations. Surprisingly, many proxies provided by various services are not even routable IP addresses, which can lead to numerous issues. This tool is particularly valuable for projects that rely on dynamic proxy pools, such as:
+- Custom rotation services
+- Proxies from unconventional or diverse sources
+- Frequently changing proxy lists
+
+By using this tool, you can mitigate the risks associated with unreliable proxies. Making requests through non-functional proxies can have serious consequences:
+- Your IP address and services may be flagged and potentially suspended by your hosting provider.
+- Failed connection attempts might be misinterpreted as malicious activity:
+    - They can resemble Distributed Denial of Service (DDoS) attacks
+    - Or be mistaken for port scanning attempts
+
+These issues often result in automated systems or network administrators reporting your traffic as potential network abuse. By validating proxies before use, you can significantly reduce these risks and improve the overall reliability and safety of your proxy-dependent operations.
 
 ## Features
 
-- Process and categorize proxy servers
-- Test proxy connectivity asynchronously
-- Handle historical proxy data
-- Maintain lists of routable, unroutable, and Cloudflare addresses
-- File-based storage for proxy lists
-- Concurrent proxy testing with progress tracking
+**We check if the address is:**
+>-   If it is private
+>-  If it is behind Cloudflare
+>-  It's reachability: ICMP, TCP
+>-  Optionally, you have the ability to test proxies.
+
+**Tasks involved:**
+>- Process and categorize proxy servers
+>- Test proxy connectivity asynchronously
+>- Handle historical proxy data
+>- Maintain lists of routable, unroutable, and Cloudflare addresses
+>- File-based storage for proxy lists
+>- Concurrent proxy testing with progress tracking
 
 ## Usage
 
