@@ -358,7 +358,7 @@ class ProxyFilter:
     async def test_and_update_proxies(self):
         test_set = set()
         for ip, data in self.ips.items():
-            if data.unroutable:
+            if not data['routable'] and "routable" in data:
                 continue
             max_ports = 3
             for port in data['ports']:
