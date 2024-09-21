@@ -1,4 +1,4 @@
-from proxy.proxyfilter import ProxyFilter
+from proxy.proxy_filter import ProxyFilter
 import asyncio
 
 

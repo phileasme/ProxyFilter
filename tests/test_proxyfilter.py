@@ -1,7 +1,7 @@
 import unittest
 import asyncio
 from unittest.mock import MagicMock, patch, call
-from proxy.proxyfilter import ProxyFilter
+from ProxyValidator.proxy.proxyvalidator import ProxyFilter
 from proxy.routability import Routability
 
 class TestProxyFilter(unittest.TestCase):

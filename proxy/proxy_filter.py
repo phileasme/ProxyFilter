@@ -11,44 +11,13 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 class ProxyFilter:
-    """
-    A class for filtering and managing proxy servers.
-
-    This class provides functionality to process, test, and categorize proxy servers.
-    It manages lists of routable, unroutable, and Cloudflare addresses, as well as
-    working and untested proxies.
-
-    Attributes:
-        ips (Dict[str, Dict]): A dictionary of IP addresses and their associated data.
-        routable_addresses (Set[str]): A set of routable IP addresses.
-        unroutable_addresses (Set[str]): A set of unroutable IP addresses.
-        cloudflare_addresses (Set[str]): A set of Cloudflare IP addresses.
-        untested_proxies (Set[str]): A set of untested proxy addresses.
-        working_proxies (Set[str]): A set of working proxy addresses.
-    """
     @dataclass
     class PortInfo:
-        """
-        A dataclass to store information about a port.
-
-        Attributes:
-            validity (int): The validity status of the port.
-            providers (Set[str]): A set of providers associated with the port.
-            calls (int): The number of calls made through this port.
-        """
         validity: int = -1
         providers: Set[str] = field(default_factory=set)
         calls: int = 0
 
         def update(self, validity: int = -1, providers: Set[str] = None, calls: int = 0):
-            """
-            Update the PortInfo with new data.
-
-            Args:
-                validity (int): New validity status.
-                providers (Set[str]): New set of providers to add.
-                calls (int): Number of calls to add.
-            """
             if validity != -1:
                 self.validity = validity
             if providers:
@@ -62,22 +31,11 @@ class ProxyFilter:
         self.routable_addresses: Set[str] = set()
         self.unroutable_addresses: Set[str] = set()
         self.cloudflare_addresses: Set[str] = set()
+        self.cloudflare_proxies: Set[str] = set()
         self.untested_proxies: Set[str] = set()
         self.working_proxies: Set[str] = set()
 
     def update_ip_entry(self, ip: str, port: str, validity: int, providers: Set[str], calls: int, is_routable: bool, is_cloudflare: bool):
-        """
-        Update or create an IP entry in the ips dictionary.
-
-        Args:
-            ip (str): The IP address.
-            port (str): The port number.
-            validity (int): The validity status.
-            providers (Set[str]): Set of providers.
-            calls (int): Number of calls.
-            is_routable (bool): Whether the IP is routable.
-            is_cloudflare (bool): Whether the IP is a Cloudflare address.
-        """
         if ip not in self.ips:
             self.ips[ip] = {"ports": OrderedDict(), "routable": False, "cloudflare": False}
 
@@ -90,15 +48,6 @@ class ProxyFilter:
         self.ips[ip]["ports"][port].update(validity=validity, providers=providers, calls=calls)
 
     async def process_proxies(self, proxies: List[str] = [], historical: bool = False, reprocess_historical: bool = False, test_proxies: bool = False):
-        """
-        Process a list of proxies, optionally including historical data and testing.
-
-        Args:
-            proxies (List[str]): List of proxy strings to process.
-            historical (bool): Whether to process historical proxy data.
-            reprocess_historical (bool): Whether to reprocess existing historical data.
-            test_proxies (bool): Whether to test the proxies after processing.
-        """
         if historical or reprocess_historical:
             await self.handle_historical_classes(reprocess_historical)
         
@@ -113,12 +62,6 @@ class ProxyFilter:
 
 
     async def handle_historical_classes(self, reprocess: bool = False):
-        """
-        Handle historical proxy classes, optionally reprocessing the data.
-
-        Args:
-            reprocess (bool): Whether to reprocess all historical data.
-        """
         logging.info("==== Historical Load ====")
         historical_proxies_by_class = check_historical_proxies()
 
@@ -150,7 +93,7 @@ class ProxyFilter:
                         if file_type == "working":
                             validity = 1
                             self.working_proxies.add(f"{ip}:{port}")
-                        elif file_type in ["broken", "unroutable", "cloudflare"]:
+                        elif file_type in ["broken", "unroutable"]: #would add cloudflare here if its a constraint
                             validity = 0
                         else:
                             self.untested_proxies.add(f"{ip}:{port}")
@@ -161,6 +104,7 @@ class ProxyFilter:
                         self.unroutable_addresses.add(ip)
                     elif file_type == "cloudflare":
                         self.cloudflare_addresses.add(ip)
+                        self.cloudflare_proxies.add(f"{ip}:{port}")
                     elif file_type in ["routable", "working", "untested"]:
                         self.routable_addresses.add(ip)
 
@@ -169,9 +113,6 @@ class ProxyFilter:
 
 
     def update_proxy_files(self):
-        """
-        Update proxy files with the current state of proxies.
-        """
         print("==== Updating proxy files ====")
         new_proxies = {
             "untested": set(),
@@ -206,22 +147,10 @@ class ProxyFilter:
         self.update_file_contents(new_proxies)
 
     async def process_new_proxies(self, proxies: List[str]):
-        """
-        Process a list of new proxies.
-
-        Args:
-            proxies (List[str]): List of new proxy strings to process.
-        """
         print("=== New Address ===")
         await self.process_proxy_list(proxies, "new")
 
     def update_file_contents(self, new_proxies: Dict[str, Set[str]]):
-        """
-        Update the contents of proxy files with new proxy data.
-
-        Args:
-            new_proxies (Dict[str, Set[str]]): Dictionary of new proxies by type.
-        """
         for file_type, proxies in new_proxies.items():
             if file_type in {"unroutable", "routable", "cloudflare"}:
                 file_path = f"proxy/proxies/_{file_type}_addresses.txt"
@@ -239,16 +168,6 @@ class ProxyFilter:
 
     @staticmethod
     def merge_proxies(existing_proxies: List[str], new_proxies: Set[str]) -> Set[str]:
-        """
-        Merge existing and new proxies, combining their information.
-
-        Args:
-            existing_proxies (List[str]): List of existing proxy strings.
-            new_proxies (Set[str]): Set of new proxy strings.
-
-        Returns:
-            Set[str]: A set of merged proxy strings.
-        """
         merged = {}
         for proxy_set in (existing_proxies, new_proxies):
             for proxy in proxy_set:
@@ -277,25 +196,10 @@ class ProxyFilter:
 
     @staticmethod
     def extract_ip(proxy: str) -> str:
-        """
-        Extract the IP address from a proxy string.
-
-        Args:
-            proxy (str): The proxy string.
-
-        Returns:
-            str: The extracted IP address.
-        """
+        """Extract the IP address from a proxy string."""
         return proxy.split(':')[0]
 
     async def process_proxy_list(self, proxies: List[str], proxy_type: str):
-        """
-        Process a list of proxies of a specific type.
-
-        Args:
-            proxies (List[str]): List of proxy strings to process.
-            proxy_type (str): The type of proxies being processed.
-        """
         test_addresses = set(self.extract_ip(address) for address in proxies if address)
         seen_address = defaultdict(list)
         for x in test_addresses:
@@ -327,15 +231,6 @@ class ProxyFilter:
         self.update_ip_info(proxies, proxy_type, checker.routable_addresses, checker.cloudflare_addresses)
 
     def update_ip_info(self, proxies: List[str], proxy_type: str, routable_addresses: Set[str], cloudflare_addresses: Set[str]):
-        """
-        Update IP information for a list of proxies.
-
-        Args:
-            proxies (List[str]): List of proxy strings to update.
-            proxy_type (str): The type of proxies being updated.
-            routable_addresses (Set[str]): Set of routable addresses.
-            cloudflare_addresses (Set[str]): Set of Cloudflare addresses.
-        """
         logger.debug(f"Updating IP info for {len(proxies)} proxies")
         for proxy in proxies:
             ip, port, validity, providers, calls = parse_proxy_string(proxy)
@@ -343,7 +238,9 @@ class ProxyFilter:
             is_routable = ip in routable_addresses
             is_cloudflare = ip in cloudflare_addresses
 
-            if "unroutable" in proxy_type or is_cloudflare or "broken" in proxy_type:
+            self.cloudflare_proxies.add(f"{ip}:{port}")
+
+            if "unroutable" in proxy_type or "broken" in proxy_type: #add cloudlfare if its an issue is_cloudflare
                 validity = 0
             elif "working" in proxy_type:
                 validity = 1
@@ -365,7 +262,7 @@ class ProxyFilter:
         for ip, document in self.ips.items():
             if document["cloudflare"]:
                 new_proxies["cloudflare"].add(ip)
-                continue
+                # continue
             if not document["routable"]:
                 new_proxies["unroutable"].add(ip)
                 continue
@@ -394,15 +291,6 @@ class ProxyFilter:
 
     @staticmethod
     def read_proxy_list(file_type):
-        """
-        Read a list of proxies from a file.
-
-        Args:
-            file_type (str): The type of proxy file to read.
-
-        Returns:
-            List[str]: A list of proxy strings read from the file.
-        """
         if file_type in {"unroutable", "routable", "cloudflare"}:
             file_path = f"proxy/proxies/_{file_type}_addresses.txt"
         else:
@@ -422,14 +310,11 @@ class ProxyFilter:
     async def test_single_proxy(session: aiohttp.ClientSession, proxy: str, timeout: int = 10) -> bool:
         """
         Test a single proxy by making an async HTTP request.
-
-        Args:
-            session (aiohttp.ClientSession): The aiohttp client session.
-            proxy (str): The proxy string to test.
-            timeout (int): Timeout for the request in seconds.
-
-        Returns:
-            bool: True if the proxy works, False otherwise.
+        
+        :param session: aiohttp ClientSession
+        :param proxy: Proxy string in format "ip:port"
+        :param timeout: Timeout in seconds
+        :return: True if the proxy works, False otherwise
         """
         try:
             url = "http://httpbin.org/ip"  # We'll use this to test our proxy
@@ -448,14 +333,11 @@ class ProxyFilter:
     async def proxy_calls(proxies: List[str], timeout: int = 10, max_concurrent: int = 1000) -> Dict[str, bool]:
         """
         Test multiple proxies concurrently with a progress bar.
-
-        Args:
-            proxies (List[str]): List of proxy strings to test.
-            timeout (int): Timeout for each request in seconds.
-            max_concurrent (int): Maximum number of concurrent requests.
-
-        Returns:
-            Dict[str, bool]: A dictionary mapping each proxy to its working status.
+        
+        :param proxies: List of proxy strings in format "ip:port"
+        :param timeout: Timeout for each request in seconds
+        :param max_concurrent: Maximum number of concurrent requests
+        :return: Dictionary mapping each proxy to its working status
         """
         results = {}
         semaphore = asyncio.Semaphore(max_concurrent)
@@ -474,13 +356,16 @@ class ProxyFilter:
         return results
 
     async def test_and_update_proxies(self):
-        """
-        Test all proxies and update their status based on the results.
-        """
         test_set = set()
         for ip, data in self.ips.items():
+            if data.unroutable:
+                continue
+            max_ports = 3
             for port in data['ports']:
+                if max_ports == 0:
+                    break
                 test_set.add(f"{ip}:{port}")
+                max_ports =- 1
         
         logging.info(f"Starting to test {len(test_set)} proxies...")
         results = await self.proxy_calls(list(test_set))
@@ -489,12 +374,13 @@ class ProxyFilter:
         
         for proxy, is_working in results.items():
             ip, port = proxy.split(':')
+            is_cloudflare = self.ips[ip]["cloudflare"] if ip in self.ips else False
             if is_working:
-                self.update_ip_entry(ip, port, validity=1, providers=set(), calls=1, is_routable=True, is_cloudflare=False)
+                self.update_ip_entry(ip, port, validity=1, providers=set(), calls=1, is_routable=True, is_cloudflare=is_cloudflare)
                 self.working_proxies.add(proxy)
                 self.routable_addresses.add(ip)
             else:
-                self.update_ip_entry(ip, port, validity=0, providers=set(), calls=1, is_routable=False, is_cloudflare=False)
+                self.update_ip_entry(ip, port, validity=0, providers=set(), calls=1, is_routable=True, is_cloudflare=is_cloudflare)
                 self.working_proxies.discard(proxy)
                 if not any(ip in p for p in self.working_proxies):
                     self.routable_addresses.discard(ip)
