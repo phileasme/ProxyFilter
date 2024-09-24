@@ -75,7 +75,7 @@ class Routability:
             return False
 
     @staticmethod
-    def traceroute_ip(ip: str, max_hops: int = 3, timeout: int = 2) -> bool:
+    def traceroute_ip(ip: str, max_hops: int = 30, timeout: int = 3) -> bool:
         """
         Perform a traceroute to an IP address to check its routability.
 
@@ -85,21 +85,32 @@ class Routability:
             timeout (int): Timeout for each hop in seconds (default: 2).
 
         Returns:
-            bool: True if the traceroute was successful, False otherwise.
+            bool: True if the IP address appears at least twice in the traceroute output, False otherwise.
         """
+        os_type = platform.system()
         try:
-            # Use TCP-based traceroute
-            traceroute_command = [
-                "traceroute", "-T", "-m", str(max_hops), "-w", str(timeout), ip
-            ]
+            if os_type == "Darwin":  # macOS
+                traceroute_command = [
+                    "traceroute", "-m", str(max_hops), "-w", str(timeout), ip
+                ]
+            else:  # Linux and others
+                traceroute_command = [
+                    "traceroute", "-T", "-m", str(max_hops), "-w", str(timeout), ip
+                ]
 
-            output = subprocess.run(
+            result = subprocess.run(
                 traceroute_command,
                 capture_output=True, text=True, timeout=timeout * max_hops
             )
             
-            return "* * *" not in output.stdout  # No timeout indicates routability
+            # Count occurrences of the IP in the output
+            ip_occurrences = result.stdout.count(ip)
+            print(f"ip occurences, {ip_occurrences}, {result.stdout}")
+            # Consider successful if IP appears at least twice
+            return ip_occurrences >= 2
+
         except subprocess.TimeoutExpired:
+            logger.warning(f"Traceroute timed out for IP: {ip}")
             return False
         except Exception as e:
             logger.error(f"Error during traceroute for {ip}: {e}")
