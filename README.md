@@ -20,13 +20,13 @@ These issues often result in automated systems or network administrators reporti
 
 ## Features
 
-**We check if the address is:**
+**The `Routability` class checks if the address is:**
 >-    private
 >-    behind Cloudflare
 >-    reachable: ICMP, TCP.
 >-    tunnelable (optionally)
 
-**Tasks involved:**
+**Tasks involved managed by `ProxyFilter` :**
 >- Process and categorize proxy servers
 >- Test proxy connectivity asynchronously
 >- Handle historical proxy data
@@ -36,7 +36,8 @@ These issues often result in automated systems or network administrators reporti
 
 ## Usage
 
-To use the proxy filtering system, you can import the `ProxyFilter` class from the main module and use its methods. Here's a basic example:
+To use the proxy filtering system, you can import the `ProxyFilter` class from the main module and use its methods. 
+Here's a basic example:
 
 ```python
 from proxy.proxyfilter import ProxyFilter
@@ -57,7 +58,7 @@ async def main():
     # Load historical proxies and test them
     await proxy_filter.process_proxies(reprocess_historical=True)
 
-    # feature_flags:
+    #  parameters:
     #   historical: if files in proxies are existant, we will use their information to avoid reprocessing already 
     #   test_proxies: tunnels through the proxies and makes a simple http request, if functional the proxy is validated.
 
