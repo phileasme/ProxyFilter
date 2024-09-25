@@ -40,7 +40,7 @@ To use the proxy filtering system, you can import the `ProxyFilter` class from t
 Here's a basic example:
 
 ```python
-from proxy.proxyfilter import ProxyFilter
+from proxy.proxy_filter import ProxyFilter
 
 async def main():
     proxy_filter = ProxyFilter()
