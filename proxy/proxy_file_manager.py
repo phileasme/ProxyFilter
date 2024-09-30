@@ -86,7 +86,7 @@ def parse_proxy_string(proxy_string: str) -> Tuple[str, str, int, Set[str], int]
             - Number of calls (int)
     """
     proxy_string_split = proxy_string.split(":")
-    ip, port_info = proxy_string_split[0], proxy_string_split[1] if len(proxy_string_split) > 1 else "80"
+    ip, port_info = proxy_string_split[0], proxy_string_split[1] if len(proxy_string_split) > 1 else ""
     port, validity, providers, calls = port_info, -1, set(), 0
 
     if "|" in port_info:

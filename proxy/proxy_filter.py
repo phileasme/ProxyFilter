@@ -238,7 +238,10 @@ class ProxyFilter:
         for proxy_set in (existing_proxies, new_proxies):
             for proxy in proxy_set:
                 ip, port, validity, providers, calls = parse_proxy_string(proxy)
-                ip_port = f"{ip}:{port}"
+                if port:
+                    ip_port = f"{ip}:{port}"
+                else:
+                    ip_port = f"{ip}"
                 
                 if ip_port not in merged:
                     merged[ip_port] = [validity, providers, calls]
