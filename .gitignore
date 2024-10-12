@@ -1,1 +1,5 @@
 proxy/proxies/*
+proxy/extractor.py
+proxy/jpproxytester.py
+proxylisttest.txt
+proxy/__pycache__/
